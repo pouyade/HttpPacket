@@ -1,0 +1,77 @@
+apply plugin: 'com.android.library'
+apply plugin: 'maven'
+
+group = 'com.dpouya.lib'
+version = '1.0.2'
+
+//apply plugin: 'com.novoda.bintray-release'
+//
+//publish {
+//
+//    def groupProjectID = 'com.dpouya'
+//    def artifactProjectID = 'Simple-http-request'
+//    def publishVersionID = '0.1.2'
+//
+//    userOrg = 'darkdevs'
+//    repoName = 'Simple-Http-Request'
+//    groupId = groupProjectID
+//    artifactId = artifactProjectID
+//    publishVersion = publishVersionID
+//    desc = 'Simply make Http Requests'
+//    website = 'https://github.com/darkdevs/Simple-Http/'
+//
+//}
+
+
+android {
+    compileSdkVersion 30
+    buildToolsVersion "29.0.3"
+
+    signingConfigs {
+        pdark{
+            storeFile file("config/release.keystore")
+            storePassword RELEASE_STORE_PASSWORD
+            keyAlias RELEASE_KEY_ALIAS
+            keyPassword RELEASE_KEY_PASSWORD
+            v2SigningEnabled false
+        }
+    }
+    lintOptions {
+        abortOnError false
+    }
+    useLibrary 'org.apache.http.legacy'
+
+    defaultConfig {
+        minSdkVersion 14
+        targetSdkVersion 30
+        versionCode 1
+        versionName version
+
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    libraryVariants.all { variant ->
+        variant.outputs.all { output ->
+            def buildType = gradle.startParameter.taskNames.any{it.toLowerCase().contains("debug")}?"debug":"release"
+            if(!gradle.startParameter.taskNames.any{it.toLowerCase().contains("debug")}){
+                outputFileName = "../../../../../output/psoft-${archivesBaseName}-${buildType}.aar"
+            }
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'com.android.volley:volley:+'
+    implementation group: 'org.apache.httpcomponents' , name: 'httpclient-android' , version: '4.3.5.1'
+    implementation('org.apache.httpcomponents:httpmime:4.3') {
+        exclude module: "httpclient"
+    }
+
+}
